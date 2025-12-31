@@ -26,6 +26,7 @@ contract MerkleAirdrop {
     function claim(address account, uint256 amount, bytes32[] calldata merkleProof) external {
         // calculate using the account and the amount , the hash -> leaf node
         bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount)))); // WARN: leaf cannot be bytes64 or longer , also don't use other hash function than keccak256 , as mentioned in @openzeppelin warning in MerkleProof
+        // WARN: also keccak256 hashed the leaf twice time for prevent preimage attack
         if (!MerkleProof.verify(merkleProof, i_merkleRoot, leaf)) {
             revert MerkleAirdrop__InvalidProof();
         }
