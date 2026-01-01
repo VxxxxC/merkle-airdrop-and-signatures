@@ -21,6 +21,7 @@ contract GenerateInput is Script {
         whitelist[3] = 0x0e466e7519A469f20168796a0807b758a2339791;
 
         string memory json = createJSON(types, whitelist, amount);
+        // WARN: will throw error if foundry.toml didn't set up `fs_permissions`
         vm.writeFile(FILE_PATH, json);
         console.log("Successfully wrote input.json to %s", FILE_PATH);
     }
