@@ -5,6 +5,9 @@ libs = ["lib"]
 
 remappings = [
 "@openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+"@murky/=lib/murky/"
 ]
+
+fs_permissions = [{ access = "read-write", path = "./"}] # NOTE: This requires read-write access to file / project root: for GenerateInput.s.sol `vm.writeFile`
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
