@@ -8,7 +8,8 @@ import {BagelToken} from "../src/BagelToken.sol";
 
 contract MerkleAirdropTest is Test {
     bytes32 public constant ROOT = 0xb1e815a99ee56f7043ed94e7e2316238187a59d85c211d06f9be7c5f94424aec;
-    uint256 public constant AmountToClaim = 25 * 1e18;
+    uint256 public constant AmountToClaim = 2500 * 1e18; // Match input.json: 2500 tokens, not 25!
+    uint256 public constant AmountToMint = AmountToClaim * 4;
 
     bytes32 public proofOne = 0x9e10faf86d92c4c65f81ac54ef2a27cc0fdf6bfea6ba4b1df5955e47f187115b;
     bytes32 public proofTwo = 0x8c1fd7b608678f6dfced176fa3e3086954e8aa495613efcd312768d41338ceab;
@@ -23,7 +24,8 @@ contract MerkleAirdropTest is Test {
     function setUp() public {
         token = new BagelToken();
         airdrop = new MerkleAirdrop(ROOT, token);
-
+        token.mint(token.owner(), AmountToMint);
+        token.transfer(address(airdrop), AmountToMint); // Transfer tokens to airdrop contract
         (user, userPrivateKey) = makeAddrAndKey("user"); // NOTE: different of `makeAddr`, `makeAddrAndKey` will also return the private key of the address
     }
 

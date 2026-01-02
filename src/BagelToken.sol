@@ -12,4 +12,3 @@ contract BagelToken is ERC20("Bagel", "BAGEL"), Ownable(msg.sender) {
         _mint(to, amount);
     }
 }
-

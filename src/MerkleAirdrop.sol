@@ -4,8 +4,9 @@ pragma solidity ^0.8.24;
 
 import {IERC20, SafeERC20} from "@openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 import {MerkleProof} from "@openzeppelin-contracts/utils/cryptography/MerkleProof.sol";
+import {ScriptHelper} from "@murky/script/common/ScriptHelper.sol";
 
-contract MerkleAirdrop {
+contract MerkleAirdrop is ScriptHelper {
     using SafeERC20 for IERC20; // NOTE: `using` syntax means we can call SafeERC20 functions on IERC20 type
 
     // some list of addresses
@@ -28,7 +29,7 @@ contract MerkleAirdrop {
 
     // WARN: This function need to be follow CEI(Checks-Effects-Interactions) pattern to prevent reentrancy attack
     function claim(address account, uint256 amount, bytes32[] calldata merkleProof) external {
-        // NOTE: CHECKS
+        // NOTE: CHECKS :
         if (s_hasClaimed[account] == true) {
             revert MerkleAirdrop__AlreadyClaimed();
         }
@@ -36,7 +37,9 @@ contract MerkleAirdrop {
         // calculate using the account and the amount , the hash -> leaf node
         // WARN: leaf cannot be bytes64 or longer , also don't use other hash function than keccak256 , as mentioned in @openzeppelin warning in MerkleProof
         // also keccak256 hashed the leaf twice time for prevent preimage attack
-        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
+        // NOTE: Must match the encoding in MakeMerkle.s.sol - convert to bytes32 to match ltrim64(abi.encode(bytes32[]))
+        bytes32 leaf =
+            keccak256(bytes.concat(keccak256(abi.encode(bytes32(uint256(uint160(account))), bytes32(amount)))));
         if (!MerkleProof.verify(merkleProof, i_merkleRoot, leaf)) {
             revert MerkleAirdrop__InvalidProof();
         }
