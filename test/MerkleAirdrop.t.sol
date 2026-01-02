@@ -5,8 +5,10 @@ pragma solidity ^0.8.24;
 import {Test, console} from "forge-std/Test.sol";
 import {MerkleAirdrop} from "../src/MerkleAirdrop.sol";
 import {BagelToken} from "../src/BagelToken.sol";
+import {DeployMerkleAirdrop} from "../script/DeployMerkleAirdrop.s.sol";
+import {ZkSyncChainChecker} from "@foundry-devops/src/ZkSyncChainChecker.sol";
 
-contract MerkleAirdropTest is Test {
+contract MerkleAirdropTest is Test, ZkSyncChainChecker {
     bytes32 public constant ROOT = 0xb1e815a99ee56f7043ed94e7e2316238187a59d85c211d06f9be7c5f94424aec;
     uint256 public constant AmountToClaim = 2500 * 1e18; // Match input.json: 2500 tokens, not 25!
     uint256 public constant AmountToMint = AmountToClaim * 4;
@@ -22,10 +24,15 @@ contract MerkleAirdropTest is Test {
     uint256 userPrivateKey;
 
     function setUp() public {
-        token = new BagelToken();
-        airdrop = new MerkleAirdrop(ROOT, token);
-        token.mint(token.owner(), AmountToMint);
-        token.transfer(address(airdrop), AmountToMint); // Transfer tokens to airdrop contract
+        if (!isZkSyncChain()) {
+            DeployMerkleAirdrop deployer = new DeployMerkleAirdrop();
+            (airdrop, token) = deployer.deployMerkleAirdrop();
+        } else {
+            token = new BagelToken();
+            airdrop = new MerkleAirdrop(ROOT, token);
+            token.mint(token.owner(), AmountToMint);
+            token.transfer(address(airdrop), AmountToMint); // Transfer tokens to airdrop contract
+        }
         (user, userPrivateKey) = makeAddrAndKey("user"); // NOTE: different of `makeAddr`, `makeAddrAndKey` will also return the private key of the address
     }
 
