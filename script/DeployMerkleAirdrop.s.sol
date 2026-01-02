@@ -13,17 +13,14 @@ contract DeployMerkleAirdrop is Script, ZkSyncChainChecker {
     uint256 private s_amountToAirdrop = 2500 * 1e18; // WARN: Match input.json: 2500 tokens, not 25!
     uint256 private s_amountToTransfer = s_amountToAirdrop * 4;
 
-    function fun() external returns(MerkleAirdrop, BagelToken) {
+    function run() external returns (MerkleAirdrop, BagelToken) {
         return deployMerkleAirdrop();
     }
 
     function deployMerkleAirdrop() public returns (MerkleAirdrop, BagelToken) {
         vm.startBroadcast();
         BagelToken token = new BagelToken();
-        MerkleAirdrop airdrop = new MerkleAirdrop(
-            s_merkleRoot,
-            IERC20(address(token))
-        );
+        MerkleAirdrop airdrop = new MerkleAirdrop(s_merkleRoot, IERC20(address(token)));
 
         token.mint(token.owner(), s_amountToAirdrop * 4); // Mint enough tokens for 4 users
         token.transfer(address(airdrop), s_amountToTransfer); //
