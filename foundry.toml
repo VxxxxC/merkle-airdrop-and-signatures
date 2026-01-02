@@ -5,7 +5,8 @@ libs = ["lib"]
 
 remappings = [
 "@openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
-"@murky/=lib/murky/"
+"@murky/=lib/murky/",
+"@foundry-devops/=lib/foundry-devops/"
 ]
 
 fs_permissions = [{ access = "read-write", path = "./"}] # NOTE: This requires read-write access to file / project root: for GenerateInput.s.sol `vm.writeFile`
