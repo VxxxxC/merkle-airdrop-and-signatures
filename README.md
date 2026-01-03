@@ -102,7 +102,30 @@ graph TB
 
 ---
 
-## 📁 Project Structure
+## � Known Bugs & Vulnerabilities
+
+| Issue | Severity | Description | Impact | Mitigation | Status |
+|-------|----------|-------------|--------|-----------|--------|
+| **Unused State Variable** | 🟡 Low | `address[] claimers` is declared but never used in contract logic | Wastes gas on initialization; confuses developers | Remove unused variable | ⚠️ OPEN |
+| **No Claim Deadline** | 🟠 Medium | No time limit for claiming airdrop; tokens locked indefinitely if unclaimed | Unclaimed tokens permanently locked in contract; users may forget to claim | Implement deadline + owner withdrawal function | ⚠️ OPEN |
+| **No Supply Cap Validation** | 🟡 Low | Contract doesn't validate if merkleRoot matches total token supply | Deployment mismatch between total claimable and tokens sent | Validate supply before deployment; add event logging | ⚠️ OPEN |
+| **Encoding Mismatch Risk** | 🟠 Medium | Leaf encoding must exactly match `abi.encode(bytes32(address), bytes32(amount))` | Incorrect encoding in script or contract causes InvalidProof errors | Document encoding standard; add test coverage | ✅ MITIGATED |
+| **No Access Control** | 🟢 Secure | `claim()` is external with no restrictions; anyone can claim if they have proof | By design - proof serves as proof of eligibility | Trust the Merkle tree generation process | ✅ SECURE |
+| **Reentrancy (Low Risk)** | 🟢 Secure | Uses CEI pattern + SafeERC20; proper ordering prevents reentrancy | Attack surface minimized | Maintain CEI pattern; use SafeERC20 | ✅ SECURE |
+| **Amount Validation** | 🟡 Low | No validation that `amount > 0`; allows claiming 0 tokens | Useless transaction but no security impact | Add `require(amount > 0)` check | ⚠️ OPEN |
+| **Account Parameter Validation** | 🟡 Low | `account` parameter not validated (could be address(0)) | User could submit address(0), losing tokens or causing confusion | Validate `account != address(0)` | ⚠️ OPEN |
+| **Merkle Root Immutability** | 🟢 Secure | Merkle root hardcoded in constructor (immutable) | Once deployed, airdrop is locked; cannot be updated or corrected | Intentional design; deploy to correct network | ✅ SECURE |
+| **Input JSON Integrity** | 🟠 Medium | No on-chain verification that input.json used matches deployed root | Off-chain data integrity issue; malicious script could generate wrong proofs | Use cryptographic hash verification; audit script execution | ⚠️ OPEN |
+
+### Vulnerability Impact Legend:
+- 🔴 **Critical**: Immediate fix required; funds at risk
+- 🟠 **Medium**: Should be fixed; design flaw but mitigated
+- 🟡 **Low**: Minor issue; gas optimization or edge case
+- 🟢 **Secure**: No vulnerability; intentional design
+
+---
+
+## 📊 Project Structure
 
 ```
 merkle-airdrop-and-signatures/
