@@ -7,6 +7,7 @@ import {MerkleProof} from "@openzeppelin-contracts/utils/cryptography/MerkleProo
 import {ScriptHelper} from "@murky/script/common/ScriptHelper.sol";
 import {EIP712} from "@openzeppelin-contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin-contracts/utils/cryptography/ECDSA.sol";
+import {console} from "forge-std/console.sol";
 
 contract MerkleAirdrop is ScriptHelper, EIP712 {
     using SafeERC20 for IERC20; // NOTE: `using` syntax means we can call SafeERC20 functions on IERC20 type
@@ -46,19 +47,27 @@ contract MerkleAirdrop is ScriptHelper, EIP712 {
         }
 
         // check the signature
-        if (!_isValidSignature(account, getMessageHash(account, amount), v, r, s)) {
+        bytes32 messageDigest = getMessageHash(account, amount);
+        if (!_isValidSignature(account, messageDigest, v, r, s)) {
             revert MerkleAirdrop__InvalidSignature();
         }
 
+        // NOTE: EFFECTS:
         // calculate using the account and the amount , the hash -> leaf node
         // WARN: leaf cannot be bytes64 or longer , also don't use other hash function than keccak256 , as mentioned in @openzeppelin warning in MerkleProof
         // also keccak256 hashed the leaf twice time for prevent preimage attack
-        // NOTE: Must match the encoding in MakeMerkle.s.sol - convert to bytes32 to match ltrim64(abi.encode(bytes32[]))
+        // PERFORMANCE: Must match the encoding in MakeMerkle.s.sol - convert to bytes32 to match ltrim64(abi.encode(bytes32[]))
         bytes32 leaf =
             keccak256(bytes.concat(keccak256(abi.encode(bytes32(uint256(uint160(account))), bytes32(amount)))));
+        console.logBytes32(merkleProof[0]);
+        console.logBytes32(merkleProof[1]);
+        console.logBytes32(i_merkleRoot);
+        console.logBytes32(leaf);
         if (!MerkleProof.verify(merkleProof, i_merkleRoot, leaf)) {
             revert MerkleAirdrop__InvalidProof();
         }
+
+        // NOTE: INTERACTIONS:
         emit Claim(account, amount);
         i_airdropToken.safeTransfer(account, amount);
     }
@@ -76,12 +85,15 @@ contract MerkleAirdrop is ScriptHelper, EIP712 {
             _hashTypedDataV4(keccak256(abi.encode(MESSAGE_TYPEHASH, AirdropClaim({account: account, amount: amount}))));
     }
 
-    function _isValidSignature(address account, bytes32 digest, uint8 v, bytes32 r, bytes32 s)
+    function _isValidSignature(address expectSigner, bytes32 digest, uint8 v, bytes32 r, bytes32 s)
         internal
-        pure
         returns (bool)
     {
-        (address actualSigner,,) = ECDSA.tryRecover(digest, v, r, s);
-        return actualSigner == account;
+        (address signer,,) = ECDSA.tryRecover(digest, v, r, s);
+        address account = address(bytes20(expectSigner));
+        console.log("account :", account);
+        address recoveredSigner = address(bytes20(signer));
+        console.log("recoveredSigner :", recoveredSigner);
+        return account == recoveredSigner;
     }
 }
