@@ -9,15 +9,17 @@ DEFAULT_ANVIL_ADDRESS_2 := 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
 DEFAULT_ZKSYNC_ADDRESS := 0x36615Cf349d7F6344891B1e7CA7C72883F5dc049
 DEFAULT_ZKSYNC_LOCAL_KEY := 0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110
 
-AIRDROP_ADDRESS := 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
-TOKEN_ADDRESS := 0x5FbDB2315678afecb367f032d93F642f64180aa3
+AIRDROP_ADDRESS := 0x59b670e9fA9D0A427751Af201D676719a970857b
+TOKEN_ADDRESS := 0xc6e7DF5E7b4f2A278906862b61205850344D4e7d
+
+MESSAGE_DIGEST := 0xa3bbb728a000bd06070fd1bafc71b60dab4b2b5bd99e4c97545544bac4346eba
 
 # zkSync constants
 
 ROOT := 0x474d994c58e37b12085fdb7bc6bbcd046cf1907b90de3b7fb083cf3636c8ebfb
 PROOF_1 := 0xd1445c931158119b00449ffcac3c947d028c0c359c34a6646d95962b3b55c6ad
 PROOF_2 := 0x46f4c7c1c21e8a90c03949beda51d2d02d1ec75b55dd97a999d3edbafa5a1e2f
-AIRDROP_AMOUNT := 25000000000000000000
+AIRDROP_AMOUNT := 2500000000000000000000
 
 help:
 	@echo "Usage:"
@@ -80,8 +82,11 @@ merkle :; forge script script/GenerateInput.s.sol:GenerateInput && forge script 
 
 zktest :; foundryup-zksync && forge test --zksync && foundryup
 
+get-message-hash:;
+	cast call ${AIRDROP_ADDRESS} "getMessageHash(address,uint256)" ${DEFAULT_ANVIL_ADDRESS} ${AIRDROP_AMOUNT} --rpc-url http://localhost:8545
+
 sign :;
-	@cast wallet sign --no-hash --private-key $(DEFAULT_ANVIL_KEY) ${shell cast call ${AIRDROP_ADDRESS} "getMessageHash(address,uint256)" ${DEFAULT_ANVIL_ADDRESS} ${AIRDROP_AMOUNT} --rpc-url http://localhost:8545}
+	@cast wallet sign --no-hash $(MESSAGE_DIGEST) --private-key $(DEFAULT_ANVIL_KEY)
 
 claim:;
 	@forge script script/Interact.s.sol:ClaimAirdrop --sender ${DEFAULT_ANVIL_ADDRESS_2} --rpc-url http://localhost:8545 --private-key $(DEFAULT_ANVIL_KEY_2) --broadcast
@@ -89,7 +94,7 @@ claim:;
 balance :;
 	@cast --to-dec ${shell cast call ${TOKEN_ADDRESS} "balanceOf(address)" ${DEFAULT_ANVIL_ADDRESS} --rpc-url http://localhost:8545}
 
-zk-get-message :; cast call ${AIRDROP_ADDRESS} "getMessageHash(address,uint256)" ${DEFAULT_ANVIL_ADDRESS} ${AIRDROP_AMOUNT} --rpc-url http://127.0.0.1:8011
+zk-get-message-hash :; cast call ${AIRDROP_ADDRESS} "getMessageHash(address,uint256)" ${DEFAULT_ANVIL_ADDRESS} ${AIRDROP_AMOUNT} --rpc-url http://127.0.0.1:8011
 
 zk-claim :; cast send ${AIRDROP_ADDRESS} "claim(address,uint256,bytes32[],uint8,bytes32,bytes32)" ${DEFAULT_ANVIL_ADDRESS} ${AIRDROP_AMOUNT} "[${PROOF_1},${PROOF_2}]" ${V} ${R} ${S} --private-key ${DEFAULT_ZKSYNC_LOCAL_KEY} --rpc-url http://127.0.0.1:8011
 

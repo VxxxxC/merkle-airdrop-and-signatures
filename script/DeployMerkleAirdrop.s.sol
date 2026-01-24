@@ -9,8 +9,8 @@ import {IERC20} from "@openzeppelin-contracts/token/ERC20/IERC20.sol";
 import {ZkSyncChainChecker} from "@foundry-devops/src/ZkSyncChainChecker.sol";
 
 contract DeployMerkleAirdrop is Script, ZkSyncChainChecker {
-    bytes32 private s_merkleRoot = 0xb1e815a99ee56f7043ed94e7e2316238187a59d85c211d06f9be7c5f94424aec;
-    uint256 private s_amountToAirdrop = 2500 * 1e18; // WARN: Match input.json: 2500 tokens, not 25!
+    bytes32 private s_merkleRoot = 0xfbc7fa54728d2f91aceba0de42d199b33c776169c2b8da355a864ec492813257;
+    uint256 private s_amountToAirdrop = 2500000000000000000000; // WARN: Match input.json: 2500 tokens, not 25!
     uint256 private s_amountToTransfer = s_amountToAirdrop * 4;
 
     function run() external returns (MerkleAirdrop, BagelToken) {

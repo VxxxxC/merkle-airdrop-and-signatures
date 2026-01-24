@@ -15,7 +15,7 @@ import {ScriptHelper} from "@murky/script/common/ScriptHelper.sol";
 
 /// @notice Merkle proof generator script
 /// @author kootsZhin
-contract MerkleScript is Script, ScriptHelper {
+contract MakeMerkle is Script, ScriptHelper {
     using stdJson for string;
 
     Merkle private m = new Merkle();
@@ -104,6 +104,6 @@ contract MerkleScript is Script, ScriptHelper {
         // WARN: will throw error if foundry.toml didn't set up `fs_permissions`
         vm.writeFile(string.concat(vm.projectRoot(), outputPath), output);
 
-        console.log("DONE: The output is found at %s", inputPath);
+        console.log("DONE: The output is found at %s", outputPath);
     }
 }

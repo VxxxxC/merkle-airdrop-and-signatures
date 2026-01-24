@@ -5,10 +5,11 @@ pragma solidity ^0.8.24;
 import {Script} from "forge-std/Script.sol";
 import {DevOpsTools} from "@foundry-devops/src/DevOpsTools.sol";
 import {MerkleAirdrop} from "../src/MerkleAirdrop.sol";
+import {console} from "forge-std/console.sol";
 
 contract ClaimAirdrop is Script {
-    address CLAIMING_ADDRESS = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
-    uint256 CLAIMING_AMOUNT = 2500 * 1e18;
+    address CLAIMING_ADDRESS = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+    uint256 CLAIMING_AMOUNT = 2500000000000000000000;
     bytes32 PROOF_ONE = 0x88a7750cb9fae3dc8e9506155674c532538ead1af8912c0681d37bf014f16a42;
     bytes32 PROOF_TWO = 0x8c1fd7b608678f6dfced176fa3e3086954e8aa495613efcd312768d41338ceab;
     bytes32[] PROOF = [PROOF_ONE, PROOF_TWO];
@@ -18,7 +19,7 @@ contract ClaimAirdrop is Script {
     // 2. at terminal, run `cast call <airdrop address> "getMessageHash(address,uint256)" "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B" 250000000000000000000 --rpc-url <RPC_URL>` -> return <digest_bytes>
     // 3. at terminal, run `cast wallet sign --no-hash <digest_bytes> --private-key <anvil_wallet_private_key> -> return <signature_bytes>
     bytes private SIGNATURE =
-        hex"a7a2bd9c3678ad7f0e04d8dcc352aca5f37e18a589eda953cab4a614a1d022ac68cc5bcf59e0157512b3cbc32b61807794e3c9ec45214b9860bb15cdc3a859591c";
+        hex"736f023bcbff42e0f961f57bd220b2bc72d083312f8868882cca01bc337f2ebf7ce48486d2c2c7704e0d037da3e625744fad1d07f3d91453c238ebde70479b201c";
 
     function run() external {
         address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment("MerkleAirdrop", block.chainid);
